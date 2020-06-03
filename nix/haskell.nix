@@ -13,19 +13,19 @@
 }:
 let
 
+  src = haskell-nix.haskellLib.cleanGit {
+      name = "cardano-node-src";
+      src = ../.;
+  };
+
+  projectPackages = lib.attrNames (haskell-nix.haskellLib.selectProjectPackages
+    (haskell-nix.cabalProject { inherit src; }));
+
   # This creates the Haskell package set.
   # https://input-output-hk.github.io/haskell.nix/user-guide/projects/
   pkgSet = haskell-nix.cabalProject {
-    src = haskell-nix.haskellLib.cleanGit {
-      name = "cardano-node";
-      src = ../.;
-    };
-    ghc = buildPackages.haskell-nix.compiler.${compiler};
-    pkg-def-extras = lib.optional stdenv.hostPlatform.isLinux (hackage: {
-      packages = {
-        "systemd" = (((hackage.systemd)."2.2.0").revisions).default;
-      };
-    });
+    inherit src;
+    compiler-nix-name = compiler;
     modules = [
 
       # Allow reinstallation of Win32
@@ -66,15 +66,18 @@ let
 
         # split data output for ekg to reduce closure size
         packages.ekg.components.library.enableSeparateDataOutput = true;
-        packages.cardano-config.configureFlags = [ "--ghc-option=-Werror" ];
 
         # cardano-cli-tests depends on cardano-cli
         packages.cardano-cli.preCheck = "export CARDANO_CLI=${pkgSet.cardano-cli.components.exes.cardano-cli}/bin/cardano-cli";
       }
+      # Compile all local packages with -Werror:
+      {
+        packages = lib.genAttrs projectPackages
+          (name: { configureFlags = [ "--ghc-option=-Werror" ]; });
+      }
       (lib.optionalAttrs profiling {
         enableLibraryProfiling = true;
         packages.cardano-node.components.exes.cardano-node.enableExecutableProfiling = true;
-        profilingDetail = "default";
       })
       (lib.optionalAttrs stdenv.hostPlatform.isLinux {
         packages.cardano-node.flags.systemd = true;
