@@ -25,7 +25,11 @@ let
   # https://input-output-hk.github.io/haskell.nix/user-guide/projects/
   pkgSet = haskell-nix.cabalProject {
     inherit src;
-    compiler-nix-name = compiler;
+    # FIXME: using
+    #compiler-nix-name = compiler;
+    # fails evaluation with
+    # "The option `packages.Win32.package.identifier.name' is used but not defined."
+    ghc = buildPackages.haskell-nix.compiler.${compiler};
     pkg-def-extras = lib.optional stdenv.hostPlatform.isLinux (hackage: {
       packages = {
         "systemd" = (((hackage.systemd)."2.2.0").revisions).default;
