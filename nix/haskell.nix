@@ -80,7 +80,8 @@ let
         packages.cardano-node.components.exes.cardano-node.enableExecutableProfiling = true;
       })
       (lib.optionalAttrs stdenv.hostPlatform.isLinux {
-        packages.cardano-node.flags.systemd = true;
+        # systemd can't be statically linked
+        packages.cardano-node.flags.systemd = !stdenv.hostPlatform.isMusl;
       })
       (lib.optionalAttrs stdenv.hostPlatform.isWindows {
         # Disable cabal-doctest tests by turning off custom setups
@@ -97,6 +98,41 @@ let
         packages.Win32.components.library.build-tools = lib.mkForce [];
         packages.terminal-size.components.library.build-tools = lib.mkForce [];
         packages.network.components.library.build-tools = lib.mkForce [];
+      })
+      # Musl libc fully static build
+      (lib.optionalAttrs stdenv.hostPlatform.isMusl (let
+        staticLibs = [ zlib openssl libffi gmp6 ];
+        gmp6 = buildPackages.gmp6.override { withStatic = true; };
+        zlib = buildPackages.zlib.static;
+        openssl = (buildPackages.openssl.override { static = true; }).out;
+        libffi = buildPackages.libffi.overrideAttrs (oldAttrs: {
+          dontDisableStatic = true;
+          configureFlags = (oldAttrs.configureFlags or []) ++ [
+                    "--enable-static"
+                    "--disable-shared"
+          ];
+        });
+        # Module options which adds GHC flags and libraries for a fully static build
+        fullyStaticOptions = {
+          enableShared = false;
+          enableStatic = true;
+          configureFlags = map (drv: "--ghc-option=-optl=-L${drv}/lib") staticLibs;
+        };
+      in
+        {
+          packages = lib.genAttrs projectPackages (name: fullyStaticOptions);
+
+          # Haddock not working and not needed for cross builds
+          doHaddock = false;
+        }
+      ))
+      # Disable cabal-doctest tests by turning off custom setups
+      (lib.optionalAttrs (stdenv.hostPlatform.isWindows || stdenv.hostPlatform.isMusl) {
+        packages.comonad.package.buildType = lib.mkForce "Simple";
+        packages.distributive.package.buildType = lib.mkForce "Simple";
+        packages.lens.package.buildType = lib.mkForce "Simple";
+        packages.nonempty-vector.package.buildType = lib.mkForce "Simple";
+        packages.semigroupoids.package.buildType = lib.mkForce "Simple";
       })
     ];
     # TODO add flags to packages (like cs-ledger) so we can turn off tests that will

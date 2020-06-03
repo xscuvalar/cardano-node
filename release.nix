@@ -109,8 +109,7 @@ let
   jobs = {
     inherit dockerImageArtifact;
     native = mapTestOn (__trace (__toJSON (packagePlatforms project)) (packagePlatforms project));
-    # TODO: fix broken evals
-    #musl64 = mapTestOnCross musl64 (packagePlatformsCross (filterJobsCross project));
+    musl64 = mapTestOnCross musl64 (packagePlatformsCross (filterJobsCross project));
     ifd-pins = mkPins {
       inherit (sources) iohk-nix "haskell.nix";
       inherit nixpkgs;
