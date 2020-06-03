@@ -26,6 +26,11 @@ let
   pkgSet = haskell-nix.cabalProject {
     inherit src;
     compiler-nix-name = compiler;
+    pkg-def-extras = lib.optional stdenv.hostPlatform.isLinux (hackage: {
+      packages = {
+        "systemd" = (((hackage.systemd)."2.2.0").revisions).default;
+      };
+    });
     modules = [
 
       # Allow reinstallation of Win32
