@@ -23,13 +23,14 @@ let
 
   # This creates the Haskell package set.
   # https://input-output-hk.github.io/haskell.nix/user-guide/projects/
-  pkgSet = haskell-nix.cabalProject {
-    inherit src;
-    # FIXME: using
-    #compiler-nix-name = compiler;
-    # fails evaluation with
+  pkgSet = haskell-nix.cabalProject (if stdenv.hostPlatform.isWindows then {
+    # FIXME: using compiler-nix-name fails evaluation with
     # "The option `packages.Win32.package.identifier.name' is used but not defined."
     ghc = buildPackages.haskell-nix.compiler.${compiler};
+  } else {
+    compiler-nix-name = compiler;
+  } // {
+    inherit src;
     pkg-def-extras = lib.optional stdenv.hostPlatform.isLinux (hackage: {
       packages = {
         "systemd" = (((hackage.systemd)."2.2.0").revisions).default;
@@ -111,11 +112,18 @@ let
       })
       # Musl libc fully static build
       (lib.optionalAttrs stdenv.hostPlatform.isMusl (let
-        staticLibs = [ zlib openssl libffi gmp6 ];
+        staticLibs = [ zlib openssl libffi gmp6 libgcrypt ];
         gmp6 = buildPackages.gmp6.override { withStatic = true; };
         zlib = buildPackages.zlib.static;
         openssl = (buildPackages.openssl.override { static = true; }).out;
         libffi = buildPackages.libffi.overrideAttrs (oldAttrs: {
+          dontDisableStatic = true;
+          configureFlags = (oldAttrs.configureFlags or []) ++ [
+                    "--enable-static"
+                    "--disable-shared"
+          ];
+        });
+        libgcrypt = buildPackages.libgcrypt.overrideAttrs (oldAttrs: {
           dontDisableStatic = true;
           configureFlags = (oldAttrs.configureFlags or []) ++ [
                     "--enable-static"
@@ -148,6 +156,6 @@ let
     # TODO add flags to packages (like cs-ledger) so we can turn off tests that will
     # not build for windows on a per package bases (rather than using --disable-tests).
     # configureArgs = lib.optionalString stdenv.hostPlatform.isWindows "--disable-tests";
-  };
+  });
 in
   pkgSet
