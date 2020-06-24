@@ -188,7 +188,7 @@ cardano-cli issue-genesis-utxo-expenditure \
             --byron-formats \
             --tx tx0.tx \
             --wallet-key byron/delegate-keys.000.key \
-            --rich-addr-from \"$(head -n 1 byron/genesis-address-000)\" \
+            --rich-addr-from $(head -n 1 byron/genesis-address-000) \
             --txout "(\"$(head -n 1 byron/address-000)\", 500000000)"
 
 # Update Proposal and votes

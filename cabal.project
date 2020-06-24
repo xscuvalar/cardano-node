@@ -213,14 +213,14 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/cardano-ledger-specs
-  tag: ee92681752dc1a27ac77cb3466af8dca4ade997f
+  tag: 789f6ba26651f1372280cc41a2d2167fe2cf64a5
   --sha256: 14k6dfq8ssc3c4shll813b8wfkf9vgsz2djvg2sll9pf2fz2g1vi
   subdir: shelley/chain-and-ledger/executable-spec
 
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/cardano-ledger-specs
-  tag: ee92681752dc1a27ac77cb3466af8dca4ade997f
+  tag: 789f6ba26651f1372280cc41a2d2167fe2cf64a5
   --sha256: 14k6dfq8ssc3c4shll813b8wfkf9vgsz2djvg2sll9pf2fz2g1vi
   subdir: shelley/chain-and-ledger/executable-spec/test
 
