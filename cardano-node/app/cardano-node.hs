@@ -21,7 +21,6 @@ import           Cardano.Shell.Types (CardanoApplication (..),
 
 import           Cardano.Common.Help
 import           Cardano.Config.TopHandler
-import           Cardano.Config.Parsers
 import           Cardano.Config.Types (CardanoEnvironment(..))
 import           Cardano.Node.Logging (createLoggingFeature)
 import           Cardano.Node.Parsers (nodeCLIParser)
@@ -131,3 +130,8 @@ initializeAllFeatures npm cardanoEnvironment = do
                                 npm
 
   pure ([loggingFeature, nodeFeature] :: [CardanoFeature], nodeLayer)
+
+command' :: String -> String -> Parser a -> Opt.Mod Opt.CommandFields a
+command' c descr p =
+    Opt.command c $ Opt.info (p <**> Opt.helper)
+              $ mconcat [ Opt.progDesc descr ]

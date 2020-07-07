@@ -51,6 +51,13 @@ library
                        Cardano.Tracing.Kernel
                        Cardano.Tracing.Peer
                        Cardano.Tracing.Tracers
+                       Cardano.TracingOrphanInstances.Byron
+                       Cardano.TracingOrphanInstances.Common
+                       Cardano.TracingOrphanInstances.Consensus
+                       Cardano.TracingOrphanInstances.HardFork
+                       Cardano.TracingOrphanInstances.Mock
+                       Cardano.TracingOrphanInstances.Network
+                       Cardano.TracingOrphanInstances.Shelley
 
   other-modules:       Paths_cardano_node
                        Cardano.Node.Socket

@@ -26,7 +26,7 @@ import qualified Data.Text as Text
 import           Cardano.Slotting.Block (BlockNo(..))
 import           Cardano.TracingOrphanInstances.Common
 import           Cardano.TracingOrphanInstances.Consensus ()
-import           Cardano.Config.Shelley.Orphans ()
+--import           Cardano.Config.Shelley.Orphans ()
 
 import           Cardano.Crypto.Hash.Class (Hash)
 import           Cardano.Crypto.KES.Class

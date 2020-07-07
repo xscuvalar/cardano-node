@@ -11,7 +11,6 @@ import           Options.Applicative
 import           System.Posix.Types (Fd(..))
 
 import           Cardano.Config.Byron.Parsers   as Byron
-import           Cardano.Config.Shelley.Parsers as Shelley
 import           Ouroboros.Network.Block (MaxSlotNo(..), SlotNo(..))
 
 import           Cardano.Node.Types
@@ -87,9 +86,9 @@ nodeRealParser = do
   -- Protocol files
   byronCertFile   <- optional Byron.parseDelegationCert
   byronKeyFile    <- optional Byron.parseSigningKey
-  shelleyKESFile  <- optional Shelley.parseKesKeyFilePath
-  shelleyVRFFile  <- optional Shelley.parseVrfKeyFilePath
-  shelleyCertFile <- optional Shelley.parseOperationalCertFilePath
+  shelleyKESFile  <- optional parseKesKeyFilePath
+  shelleyVRFFile  <- optional parseVrfKeyFilePath
+  shelleyCertFile <- optional parseOperationalCertFilePath
 
   -- Node Address
   nAddress <- optional parseNodeAddress
@@ -153,4 +152,29 @@ parseTopologyFile =
             long "topology"
          <> metavar "FILEPATH"
          <> help "The path to a file describing the topology."
+    )
+
+parseOperationalCertFilePath :: Parser FilePath
+parseOperationalCertFilePath =
+  strOption
+    ( long "shelley-operational-certificate"
+        <> metavar "FILEPATH"
+        <> help "Path to the delegation certificate."
+    )
+
+--TODO: pass the current KES evolution, not the KES_0
+parseKesKeyFilePath :: Parser FilePath
+parseKesKeyFilePath =
+  strOption
+    ( long "shelley-kes-key"
+        <> metavar "FILEPATH"
+        <> help "Path to the KES signing key."
+    )
+
+parseVrfKeyFilePath :: Parser FilePath
+parseVrfKeyFilePath =
+  strOption
+    ( long "shelley-vrf-key"
+        <> metavar "FILEPATH"
+        <> help "Path to the VRF signing key."
     )

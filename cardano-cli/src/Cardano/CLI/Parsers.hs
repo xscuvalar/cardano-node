@@ -4,11 +4,11 @@ module Cardano.CLI.Parsers
   ) where
 
 import           Cardano.Prelude
+import           Prelude (String)
 
 import           Options.Applicative
 import qualified Options.Applicative as Opt
 
-import           Cardano.Config.Parsers (command')
 import           Cardano.CLI.Byron.Parsers   (parseByronCommands)
 import           Cardano.CLI.Run (ClientCommand(..))
 import           Cardano.CLI.Shelley.Parsers (parseShelleyCommands)
@@ -73,3 +73,8 @@ parseDisplayVersion =
         <> help "Show the cardano-cli version"
         <> hidden
         )
+
+command' :: String -> String -> Parser a -> Opt.Mod Opt.CommandFields a
+command' c descr p =
+    Opt.command c $ Opt.info (p <**> Opt.helper)
+              $ mconcat [ Opt.progDesc descr ]

@@ -62,13 +62,18 @@ import           Cardano.Config.Types
 import           Cardano.Config.Parsers
                    (parseIntegral, parseFraction, parseLovelace, readDouble,
                     parseFilePath,  parseSigningKeyFile,
-                    parseGenesisFile, command', parseFlag')
+                    parseGenesisFile, parseFlag')
 
 import           Cardano.CLI.Byron.Commands
 import           Cardano.CLI.Byron.Genesis
 import           Cardano.CLI.Byron.Key
 import           Cardano.CLI.Byron.Tx
 import           Cardano.CLI.Byron.UpdateProposal
+
+command' :: String -> String -> Parser a -> Opt.Mod Opt.CommandFields a
+command' c descr p =
+    Opt.command c $ Opt.info (p <**> Opt.helper)
+              $ mconcat [ Opt.progDesc descr ]
 
 
 parseByronCommands :: Mod CommandFields ByronCommand
