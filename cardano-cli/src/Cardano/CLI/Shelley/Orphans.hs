@@ -21,7 +21,6 @@ import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
 
 import           Cardano.Crypto.Hash.Class as Crypto
-import           Cardano.TracingOrphanInstances.Common ()
 
 import           Ouroboros.Consensus.Shelley.Protocol.Crypto (TPraosStandardCrypto)
 import           Ouroboros.Consensus.Shelley.Ledger.Block (ShelleyHash(..))

@@ -39,12 +39,12 @@ import           Cardano.Api.Protocol.Shelley (mkNodeClientProtocolShelley)
 import           Cardano.Api.Types ()
 import           Cardano.Config.Types (SocketPath (..))
 
-import qualified Codec.CBOR.Term as CBOR
+--import qualified Codec.CBOR.Term as CBOR
 
 import           Control.Monad.Class.MonadSTM.Strict
                    (MonadSTM, StrictTMVar, atomically, newEmptyTMVarM, tryPutTMVar, takeTMVar)
 import           Control.Monad.Trans.Except.Extra (hoistEither, newExceptT)
-import           Control.Tracer (Tracer)
+--import           Control.Tracer (Tracer)
 
 import           Data.Aeson (ToJSON (..), (.=))
 import qualified Data.Aeson as Aeson
@@ -58,7 +58,7 @@ import           Data.Text (Text)
 import qualified Data.Text as Text
 import           Data.Void (Void)
 
-import           Network.Mux (MuxMode(..), MuxTrace, WithMuxBearer)
+import           Network.Mux (MuxMode(..)) --MuxTrace, WithMuxBearer
 
 import           Ouroboros.Consensus.Block (CodecConfig)
 import           Ouroboros.Consensus.Cardano (protocolClientInfo)
@@ -74,10 +74,11 @@ import           Ouroboros.Consensus.Shelley.Protocol.Crypto (TPraosStandardCryp
 import           Ouroboros.Network.Block (Point, Serialised (..))
 import           Ouroboros.Network.Mux (OuroborosApplication(..),
                    MuxPeer(..), RunMiniProtocol(..))
-import           Ouroboros.Network.NodeToClient (ConnectionId, DictVersion, Handshake,
+import           Ouroboros.Network.NodeToClient (DictVersion,
                    LocalAddress, NetworkConnectTracers (..),
                    NodeToClientProtocols (..), NodeToClientVersion, NodeToClientVersionData (..),
-                   TraceSendRecv, Versions)
+                    Versions)
+                   -- ConnectionId,  Handshake, TraceSendRecv,
 import qualified Ouroboros.Network.NodeToClient as NodeToClient
 import           Ouroboros.Network.Protocol.LocalStateQuery.Client
                    (ClientStAcquired (..), ClientStAcquiring (..), ClientStIdle (..),
@@ -275,20 +276,20 @@ queryNodeLocalState trce cfg nm (SocketPath socketPath) pointAndQuery = do
       NodeToClient.connectTo
         (NodeToClient.localSnocket iocp socketPath)
         NetworkConnectTracers
-          { nctMuxTracer = muxTracer
-          , nctHandshakeTracer = handshakeTracer
+          { nctMuxTracer = panic "" --muxTracer
+          , nctHandshakeTracer = panic "" --handshakeTracer
           }
         (localInitiatorNetworkApplication trce cfg nm resultVar pointAndQuery)
         socketPath
       atomically $ takeTMVar resultVar
   where
-    muxTracer :: Show peer => Tracer IO (WithMuxBearer peer MuxTrace)
-    muxTracer = toLogObject $ appendName "Mux" trce
+    --muxTracer :: Show peer => Tracer IO (WithMuxBearer peer MuxTrace)
+    --muxTracer = toLogObject $ appendName "Mux" trce
 
-    handshakeTracer :: Tracer IO
-                        (WithMuxBearer (ConnectionId LocalAddress)
-                        (TraceSendRecv (Handshake NodeToClientVersion CBOR.Term)))
-    handshakeTracer = toLogObject $ appendName "Handshake" trce
+    -- handshakeTracer :: Tracer IO
+    --                     (WithMuxBearer (ConnectionId LocalAddress)
+    --                     (TraceSendRecv (Handshake NodeToClientVersion CBOR.Term)))
+    -- handshakeTracer = toLogObject $ appendName "Handshake" trce
 
 localInitiatorNetworkApplication
   :: forall blk result. RunNode blk

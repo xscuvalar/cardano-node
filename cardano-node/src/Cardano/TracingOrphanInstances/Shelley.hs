@@ -257,22 +257,22 @@ instance Crypto c => ToObject (PredicateFailure (UTXOW c)) where
              ]
   toObject _verb (MissingTxBodyMetaDataHash metaDataHash) =
     mkObject [ "kind" .= String "MissingTxBodyMetaDataHash"
-             , "metaDataHash" .= metaDataHash
+             , "metaDataHash" .= String (show metaDataHash)
              ]
   toObject _verb (MissingTxMetaData txBodyMetaDataHash) =
     mkObject [ "kind" .= String "MissingTxMetaData"
-             , "txBodyMetaDataHash" .= txBodyMetaDataHash
+             , "txBodyMetaDataHash" .= String (show txBodyMetaDataHash)
              ]
   toObject _verb (ConflictingMetaDataHash txBodyMetaDataHash fullMetaDataHash) =
     mkObject [ "kind" .= String "ConflictingMetaDataHash"
-             , "txBodyMetaDataHash" .= txBodyMetaDataHash
-             , "fullMetaDataHash" .= fullMetaDataHash
+             , "txBodyMetaDataHash" .= String (show txBodyMetaDataHash)
+             , "fullMetaDataHash" .= String (show fullMetaDataHash)
              ]
 
 instance Crypto c => ToObject (PredicateFailure (UTXO c)) where
   toObject _verb (BadInputsUTxO badInputs) =
     mkObject [ "kind" .= String "BadInputsUTxO"
-             , "badInputs" .= badInputs
+             , "badInputs" .= String (show badInputs)
              , "error" .= renderBadInputsUTxOErr badInputs
              ]
   toObject _verb (ExpiredUTxO ttl slot) =
@@ -286,7 +286,7 @@ instance Crypto c => ToObject (PredicateFailure (UTXO c)) where
   -- TODO: Add the minimum allowed UTxO value to OutputTooSmallUTxO
   toObject _verb (OutputTooSmallUTxO tooSmallOutputs) =
     mkObject [ "kind" .= String "OutputTooSmallUTxO"
-             , "tooSmallOutputs" .= tooSmallOutputs
+             , "tooSmallOutputs" .= String (show tooSmallOutputs)
              , "error" .= String "The output is smaller than the allow minimum \
                                  \UTxO value defined in the protocol parameters"
              ]

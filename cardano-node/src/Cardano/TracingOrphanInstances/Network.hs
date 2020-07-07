@@ -19,7 +19,7 @@ import           Prelude (String, show, id)
 import           Data.Text (pack)
 
 import qualified Network.Socket as Socket (SockAddr)
-import           Network.Mux (WithMuxBearer (..), MuxTrace (..))
+import           Network.Mux (MuxTrace, WithMuxBearer (..))
 
 import           Cardano.TracingOrphanInstances.Common
 
@@ -275,36 +275,6 @@ instance ToObject (Identity (SubscriptionTrace LocalAddress)) where
              ]
 
 
-instance HasPrivacyAnnotation (WithMuxBearer peer MuxTrace)
-instance HasSeverityAnnotation (WithMuxBearer peer MuxTrace) where
-  getSeverityAnnotation (WithMuxBearer _ ev) = case ev of
-    MuxTraceRecvHeaderStart -> Debug
-    MuxTraceRecvHeaderEnd {} -> Debug
-    MuxTraceRecvStart {} -> Debug
-    MuxTraceRecvEnd {} -> Debug
-    MuxTraceSendStart {} -> Debug
-    MuxTraceSendEnd -> Debug
-    MuxTraceState {} -> Info
-    MuxTraceCleanExit {} -> Notice
-    MuxTraceExceptionExit {} -> Notice
-    MuxTraceChannelRecvStart {} -> Debug
-    MuxTraceChannelRecvEnd {} -> Debug
-    MuxTraceChannelSendStart {} -> Debug
-    MuxTraceChannelSendEnd {} -> Debug
-    MuxTraceHandshakeStart -> Debug
-    MuxTraceHandshakeClientEnd {} -> Info
-    MuxTraceHandshakeServerEnd -> Debug
-    MuxTraceHandshakeClientError {} -> Error
-    MuxTraceHandshakeServerError {} -> Error
-    MuxTraceRecvDeltaQObservation {} -> Debug
-    MuxTraceRecvDeltaQSample {} -> Debug
-    MuxTraceSDUReadTimeoutException -> Notice
-    MuxTraceSDUWriteTimeoutException -> Notice
-    MuxTraceStartEagerly _ _ -> Debug
-    MuxTraceStartOnDemand _ _ -> Debug
-    MuxTraceStartedOnDemand _ _ -> Debug
-    MuxTraceShutdown -> Debug
-
 --
 -- | instances of @Transformable@
 --
@@ -378,16 +348,16 @@ instance Transformable Text IO (WithIPList (SubscriptionTrace Socket.SockAddr)) 
 instance HasTextFormatter (WithIPList (SubscriptionTrace Socket.SockAddr)) where
   formatText _ = pack . show . toList
 
+instance ToObject (WithMuxBearer peer MuxTrace) where
+  toObject _verb _ = panic ""
 
-instance (Show peer)
-      => Transformable Text IO (WithMuxBearer peer MuxTrace) where
+instance HasSeverityAnnotation (WithMuxBearer peer MuxTrace) where
+  getSeverityAnnotation _ = panic ""
+instance HasPrivacyAnnotation (WithMuxBearer peer MuxTrace) where
+instance HasTextFormatter (WithMuxBearer peer MuxTrace) where
+  formatText _ = pack . show . toList
+instance Transformable Text IO (WithMuxBearer peer MuxTrace) where
   trTransformer = trStructuredText
-instance (Show peer)
-      => HasTextFormatter (WithMuxBearer peer MuxTrace) where
-  formatText (WithMuxBearer peer ev) = \_o ->
-    "Bearer on " <> pack (show peer)
-   <> " event: " <> pack (show ev)
-
 
 --
 -- | instances of @ToObject@
@@ -642,11 +612,4 @@ instance ToObject (WithDomainName (SubscriptionTrace Socket.SockAddr)) where
   toObject _verb (WithDomainName dom ev) =
     mkObject [ "kind" .= String "SubscriptionTrace"
              , "domain" .= show dom
-             , "event" .= show ev ]
-
-
-instance (Show peer) => ToObject (WithMuxBearer peer MuxTrace) where
-  toObject _verb (WithMuxBearer b ev) =
-    mkObject [ "kind" .= String "MuxTrace"
-             , "bearer" .= show b
              , "event" .= show ev ]
