@@ -9,7 +9,6 @@ module Cardano.Api.TextView
   , TextViewError (..)
   , TextViewType (..)
   , TextViewDescription (..)
-  , renderTextView
   , renderTextViewError
   , expectTextViewOfType
   , textViewJSONConfig
@@ -19,11 +18,6 @@ module Cardano.Api.TextView
     -- * File IO support
   , TextViewFileError (..)
   , renderTextViewFileError
-  , writeTextViewFile
-
-    -- * Exported for testing.
-  , rawToMultilineHex
-  , unRawToMultilineHex
   ) where
 
 import           Cardano.Prelude
@@ -40,8 +34,6 @@ import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
 
 import           Cardano.Binary
-import           Control.Monad.Trans.Except.Extra
-
 
 newtype TextViewType
   = TextViewType { unTextViewType :: ByteString }
@@ -115,17 +107,6 @@ renderTextViewError tve =
     TextViewAesonDecodeError decErr -> "TextView aeson decode error: " <> textShow decErr
     TextViewDecodeError decErr -> "TextView decode error: " <> textShow decErr
 
--- | Render a 'TextView' into the external serialised format.
---
-renderTextView :: TextView -> ByteString
-renderTextView tv =
-  BS.unlines $
-    [ "type: " <> unTextViewType (tvType tv)
-    , "title: " <> unTextViewDescription (tvDescription tv)
-    , "cbor-hex:"
-    ]
-    <> rawToMultilineHex (tvRawCBOR tv)
-
 -- ----------------------------------------------------------------------------
 
 -- | Check that the \"type\" of the 'TextView' is as expected.
@@ -156,35 +137,7 @@ renderTextViewFileError tvfe =
       "TextView IO exception at: " <> toS fp <> " Error: " <> textShow ioExcpt
 
 
-
--- | Write a file in the external serialised format for 'TextView'.
---
-writeTextViewFile :: FilePath -> TextView -> IO (Either TextViewFileError ())
-writeTextViewFile path tv =
-    runExceptT $
-      handleIOExceptT (TextViewFileIOError path) $
-        BS.writeFile path (renderTextView tv)
-
-
 -- ----------------------------------------------------------------------------
-
-chunksOf :: ByteString -> [ByteString]
-chunksOf bs =
-  case BS.splitAt 80 bs of
-    (leading, "") -> [leading]
-    (leading, trailing) -> leading : chunksOf trailing
-
-
--- | Convert a raw ByteString to hexadecimal and then line wrap
-rawToMultilineHex :: ByteString -> [ByteString]
-rawToMultilineHex = map (BS.cons ' ') . chunksOf . Base16.encode
 
 textShow :: Show a => a -> Text
 textShow = Text.pack . show
-
--- | Convert from multiline hexadecimal to a raw ByteString.
-unRawToMultilineHex :: ByteString -> Either TextViewError ByteString
-unRawToMultilineHex bs =
-  case Base16.decode $ BS.concat (map (BS.dropWhile isSpace) $ BS.lines bs) of
-    (raw, "") -> Right raw
-    (_, err) -> Left $ TextViewFormatError ("unRawToMultilineHex: Unable to decode " <> textShow err)
