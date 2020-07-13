@@ -144,3 +144,5 @@ golden_shelleyGenesisCreate = OP.propertyOnce $ do
     -- Check utxo keys
     assertFileOccurences 1 "Genesis UTxO signing key" $ tempDir <> "/utxo-keys/utxo" <> show i <> ".skey"
     assertFileOccurences 1 "Genesis UTxO verification key"  $ tempDir <> "/utxo-keys/utxo" <> show i <> ".vkey"
+
+  liftIO $ IO.removeDirectoryRecursive tempDir
